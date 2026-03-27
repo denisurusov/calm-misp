@@ -50,13 +50,15 @@ Default credentials: `admin@admin.test` / `admin`.
 
 ### 2. MISP API key
 
-The Docker Compose stack sets a fixed admin key automatically:
+Log in to MISP → top-right menu → **My Profile** → copy the **Automation key**.
 
-```
-deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+Use it in the commands below, or export it for the session:
+
+```bash
+export MISP_API_KEY=<your-key>
 ```
 
-Use this value for `MISP_API_KEY` in the commands below.
+For CI, add it as a repository secret: **GitHub → Settings → Secrets and variables → Actions → New repository secret**, name `MISP_API_KEY`.
 
 ### 3. Seed demo IOCs
 
