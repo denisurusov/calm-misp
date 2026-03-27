@@ -42,9 +42,15 @@ docker compose -f docker/docker-compose.yml up -d
 Wait ~2 minutes for MISP to initialise, then open [https://localhost](https://localhost).
 Default credentials: `admin@admin.test` / `admin`.
 
-### 2. Get your MISP API key
+### 2. MISP API key
 
-Log in to MISP → top-right menu → **My Profile** → copy the **Automation key**.
+The Docker Compose stack sets a fixed admin key automatically:
+
+```
+deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+```
+
+Use this value for `MISP_API_KEY` in the commands below.
 
 ### 3. Seed demo IOCs
 
