@@ -49,13 +49,13 @@ jobs:
         run: python scripts/misp_seed.py
         env:
           MISP_URL: https://localhost
-          MISP_API_KEY: deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+          MISP_API_KEY: ${{ secrets.MISP_API_KEY }}
 
       - name: Run MISP threat check (pre-build gate)
         run: python scripts/misp_check.py calm/hello-world.architecture.json
         env:
           MISP_URL: https://localhost
-          MISP_API_KEY: deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+          MISP_API_KEY: ${{ secrets.MISP_API_KEY }}
 
       # ── Build ───────────────────────────────────────────────────────────────
       - name: Setup Java 23
