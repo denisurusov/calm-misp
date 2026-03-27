@@ -45,32 +45,17 @@ jobs:
             sleep 5
           done
 
-      - name: Obtain MISP automation key
-        id: misp-key
-        run: |
-          # Log in and extract the automation key from the API
-          API_KEY=$(curl -sk -X POST https://localhost/users/login \
-            -d 'data[User][email]=admin@admin.test&data[User][password]=admin' \
-            -c /tmp/misp-cookie.txt \
-            -b /tmp/misp-cookie.txt \
-            --output /dev/null \
-            && curl -sk https://localhost/users/view/me.json \
-              -b /tmp/misp-cookie.txt \
-              -H "Accept: application/json" \
-            | python3 -c "import sys,json; print(json.load(sys.stdin)['User']['authkey'])")
-          echo "MISP_API_KEY=$API_KEY" >> "$GITHUB_ENV"
-
       - name: Seed MISP with demo IOCs
         run: python scripts/misp_seed.py
         env:
           MISP_URL: https://localhost
-          # MISP_API_KEY set in previous step
+          MISP_API_KEY: deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
 
       - name: Run MISP threat check (pre-build gate)
         run: python scripts/misp_check.py calm/hello-world.architecture.json
         env:
           MISP_URL: https://localhost
-          # MISP_API_KEY inherited from env
+          MISP_API_KEY: deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
 
       # ── Build ───────────────────────────────────────────────────────────────
       - name: Setup Java 23
