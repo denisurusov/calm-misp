@@ -45,17 +45,22 @@ jobs:
             sleep 5
           done
 
+      - name: Obtain MISP automation key
+        run: |
+          API_KEY=$(docker compose -f docker/docker-compose.yml exec -T misp-db \
+            mysql -u misp -pmisp_password misp -sNe \
+            "SELECT authkey FROM users WHERE email='admin@admin.test'")
+          echo "MISP_API_KEY=$API_KEY" >> "$GITHUB_ENV"
+
       - name: Seed MISP with demo IOCs
         run: python scripts/misp_seed.py
         env:
           MISP_URL: https://localhost
-          MISP_API_KEY: ${{ secrets.MISP_API_KEY }}
 
       - name: Run MISP threat check (pre-build gate)
         run: python scripts/misp_check.py calm/hello-world.architecture.json
         env:
           MISP_URL: https://localhost
-          MISP_API_KEY: ${{ secrets.MISP_API_KEY }}
 
       # ── Build ───────────────────────────────────────────────────────────────
       - name: Setup Java 23
