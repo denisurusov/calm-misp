@@ -1,0 +1,89 @@
+name: Build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── CALM structural validation ──────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install CALM CLI
+        run: npm install -g @finos/calm-cli
+
+      - name: Validate CALM architecture against pattern
+        run: |
+          calm validate \
+            --pattern calm/hello-world.pattern.json \
+            --architecture calm/hello-world.architecture.json
+
+      # ── MISP threat intelligence check ─────────────────────────────────────
+      - name: Start MISP stack
+        run: docker compose -f docker/docker-compose.yml up -d
+
+      - name: Wait for MISP to be ready
+        run: |
+          echo "Waiting for MISP to start (up to 3 minutes)..."
+          for i in $(seq 1 36); do
+            if curl -sk https://localhost/users/login | grep -q "MISP"; then
+              echo "MISP is up."
+              break
+            fi
+            echo "  Attempt $i/36 — sleeping 5s..."
+            sleep 5
+          done
+
+      - name: Obtain MISP automation key
+        id: misp-key
+        run: |
+          # Log in and extract the automation key from the API
+          API_KEY=$(curl -sk -X POST https://localhost/users/login \
+            -d 'data[User][email]=admin@admin.test&data[User][password]=admin' \
+            -c /tmp/misp-cookie.txt \
+            -b /tmp/misp-cookie.txt \
+            --output /dev/null \
+            && curl -sk https://localhost/users/view/me.json \
+              -b /tmp/misp-cookie.txt \
+              -H "Accept: application/json" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['User']['authkey'])")
+          echo "MISP_API_KEY=$API_KEY" >> "$GITHUB_ENV"
+
+      - name: Seed MISP with demo IOCs
+        run: python scripts/misp_seed.py
+        env:
+          MISP_URL: https://localhost
+          # MISP_API_KEY set in previous step
+
+      - name: Run MISP threat check (pre-build gate)
+        run: python scripts/misp_check.py calm/hello-world.architecture.json
+        env:
+          MISP_URL: https://localhost
+          # MISP_API_KEY inherited from env
+
+      # ── Build ───────────────────────────────────────────────────────────────
+      - name: Setup Java 23
+        uses: actions/setup-java@v4
+        with:
+          java-version: "23"
+          distribution: "temurin"
+
+      - name: Build with Maven
+        run: mvn --batch-mode package
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: hello-world-jar
+          path: target/hello-world.jar

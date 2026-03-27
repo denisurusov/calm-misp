@@ -1,0 +1,58 @@
+services:
+  misp:
+    image: ghcr.io/misp/misp-docker/misp-core:latest
+    ports:
+      - "443:443"
+      - "80:80"
+    environment:
+      - MYSQL_HOST=misp-db
+      - MYSQL_USER=misp
+      - MYSQL_PASSWORD=misp_password
+      - MYSQL_DATABASE=misp
+      - REDIS_HOST=redis
+      - MISP_ADMIN_EMAIL=admin@admin.test
+      - MISP_ADMIN_PASSPHRASE=admin
+      - MISP_BASEURL=https://localhost
+      - MISP_MODULES_FQDN=http://misp-modules
+      - NUM_WORKERS_DEFAULT=1
+      - NUM_WORKERS_PRIO=1
+      - NUM_WORKERS_EMAIL=0
+      - NUM_WORKERS_UPDATE=1
+    depends_on:
+      misp-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  misp-modules:
+    image: ghcr.io/misp/misp-docker/misp-modules:latest
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  misp-db:
+    image: mariadb:10.11
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_USER=misp
+      - MYSQL_PASSWORD=misp_password
+      - MYSQL_DATABASE=misp
+    volumes:
+      - misp-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass redispassword
+    restart: unless-stopped
+
+volumes:
+  misp-db-data:

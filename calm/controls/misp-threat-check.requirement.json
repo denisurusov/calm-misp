@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/calm/controls/misp-threat-check.requirement.json",
+  "title": "MISP Threat Intelligence Check",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "https://calm.finos.org/release/1.0-rc1/meta/control-requirement.json"
+    }
+  ],
+  "properties": {
+    "control-id": {
+      "const": "security-misp-001"
+    },
+    "name": {
+      "const": "MISP Threat Intelligence Check"
+    },
+    "description": {
+      "const": "Validates architecture node endpoints against a MISP threat intelligence instance. Fails if any endpoint matches a known IOC with to_ids=true."
+    },
+    "misp-url": {
+      "type": "string",
+      "description": "Base URL of the MISP instance to query (e.g. https://localhost)"
+    }
+  },
+  "required": [
+    "control-id",
+    "name",
+    "description",
+    "misp-url"
+  ]
+}

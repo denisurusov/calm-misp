@@ -1,0 +1,7 @@
+{
+  "$schema": "https://example.com/calm/controls/misp-threat-check.requirement.json",
+  "control-id": "security-misp-001",
+  "name": "MISP Threat Intelligence Check",
+  "description": "Validates architecture node endpoints against a MISP threat intelligence instance. Fails if any endpoint matches a known IOC with to_ids=true.",
+  "misp-url": "https://localhost"
+}

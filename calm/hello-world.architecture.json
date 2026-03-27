@@ -1,0 +1,60 @@
+{
+  "$schema": "https://calm.finos.org/release/1.0-rc2/meta/calm.json",
+  "$id": "https://example.com/calm/hello-world.architecture.json",
+  "nodes": [
+    {
+      "unique-id": "web-browser",
+      "name": "Web Browser",
+      "description": "Client browser accessing the Hello World API",
+      "node-type": "webclient"
+    },
+    {
+      "unique-id": "hello-world-service",
+      "name": "Hello World Service",
+      "description": "A simple Hello World web API",
+      "node-type": "service",
+      "interfaces": [
+        {
+          "unique-id": "service-host-port",
+          "host": "api.hello-world.com",
+          "port": 7070
+        }
+      ],
+      "controls": {
+        "threat-intelligence": {
+          "description": "MISP threat intelligence check on service endpoints",
+          "requirements": [
+            {
+              "requirement-url": "https://example.com/calm/controls/misp-threat-check.requirement.json",
+              "config-url": "https://example.com/calm/controls/misp-threat-check.config.json"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "unique-id": "browser-service",
+      "description": "Browser calls Hello World API over HTTP",
+      "protocol": "HTTP",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "web-browser" },
+          "destination": { "node": "hello-world-service" }
+        }
+      },
+      "controls": {
+        "security": {
+          "description": "Permitted connection security control",
+          "requirements": [
+            {
+              "requirement-url": "https://calm.finos.org/getting-started/controls/permitted-connection.requirement.json",
+              "config-url": "https://calm.finos.org/getting-started/controls/permitted-connection-http.config.json"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
