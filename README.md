@@ -1,14 +1,20 @@
 # calm-misp
 
-A proof-of-concept demonstrating **threat-informed architecture validation** — CALM architecture models validated against live MISP threat intelligence data before every build.
+A proof-of-concept demonstrating **threat-informed architecture validation** — CALM architecture models validated
+against live MISP threat intelligence data before every build.
 
 > "CALM and MISP should be friends."
 
+See [docs/proposal.md](docs/proposal.md) for the original idea and motivation.
+
 ## What this does
 
-[CALM](https://calm.finos.org/) (Common Architecture Modelling Language by FINOS) lets you define software architecture as code. [MISP](https://www.misp-project.org/) stores Indicators of Compromise (IOCs) — known-malicious domains, IPs, and URLs.
+[CALM](https://calm.finos.org/) (Common Architecture Modelling Language by FINOS) lets you define software architecture
+as code. [MISP](https://www.misp-project.org/) stores Indicators of Compromise (IOCs) — known-malicious domains, IPs,
+and URLs.
 
-This project wires the two together: when you build, a pre-build gate reads your CALM architecture file, extracts every external endpoint, and checks them against live MISP threat data. If any endpoint is a known IOC, **the build fails**.
+This project wires the two together: when you build, a pre-build gate reads your CALM architecture file, extracts every
+external endpoint, and checks them against live MISP threat data. If any endpoint is a known IOC, **the build fails**.
 
 ```
 CALM architecture file
@@ -59,6 +65,7 @@ MISP_URL=https://localhost MISP_API_KEY=<your-key> python scripts/misp_seed.py
 ```
 
 This adds two malicious domains to MISP:
+
 - `evil.example.com`
 - `malicious.badactor.net`
 
@@ -146,7 +153,10 @@ src/main/java/com/example/
 
 ## How CALM controls fit in
 
-The `calm/controls/` files document the intent of the MISP check in CALM's control model. The CALM CLI validates structural compliance (nodes, relationships, interfaces). The actual threat intelligence enforcement is performed by `scripts/misp_check.py` as a separate CI step — this is the extension point that could be published to [CALM Hub](https://calm.finos.org/) for reuse across teams.
+The `calm/controls/` files document the intent of the MISP check in CALM's control model. The CALM CLI validates
+structural compliance (nodes, relationships, interfaces). The actual threat intelligence enforcement is performed by
+`scripts/misp_check.py` as a separate CI step — this is the extension point that could be published
+to [CALM Hub](https://calm.finos.org/) for reuse across teams.
 
 ## CI/CD
 
